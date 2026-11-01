@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Happy Birthday, Thangame!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Poppins:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: radial-gradient(circle at 50% 35%, #3b1c32 0%, #1a0b16 75%, #0d040a 100%);
+      --bg-light: radial-gradient(circle at 50% 40%, #ffdde1 0%, #fcefe9 65%, #f7e1d7 100%);
+      --gold: #e6a83a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+      background: #1a0b16;
+      color: #fff;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      overflow-y: auto;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Screen 1: Bow & Heart */
+    #screen-1 {
+      background: var(--bg-light);
+      color: #9e475b;
+      justify-content: space-between;
+      padding: 60px 20px 45px;
+    }
+
+    .sub-italic {
+      font-style: italic;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      color: #9e475b;
+      margin-top: 20px;
+    }
+
+    .heart-target {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 15px 30px rgba(235, 75, 115, 0.45));
+      transition: transform 0.3s ease;
+    }
+
+    .heart-svg {
+      width: 120px;
+      height: 120px;
+      animation: pulse 1.6s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .heart-burst-text {
+      position: absolute;
+      width: 300px;
+      text-align: center;
+      font-family: 'Caveat', cursive;
+      font-size: 2.3rem;
+      color: #d81b60;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-shadow: 0 4px 15px rgba(216, 27, 96, 0.25);
+    }
+
+    .heart-burst-text.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .bow-area {
+      position: relative;
+      width: 240px;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+
+    .pull-hint {
+      font-size: 0.85rem;
+      letter-spacing: 2.5px;
+      color: #b56576;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    /* Dark Theme Screens */
+    .dark-screen {
+      background: var(--bg-dark);
+    }
+
+    /* Screen 2: Cake Building */
+    .title-text {
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .instruction-sub {
+      font-size: 0.95rem;
+      color: #d1b3c4;
+      margin-bottom: 25px;
+      text-align: center;
+      min-height: 24px;
+      z-index: 2;
+    }
+
+    .cake-stage {
+      position: relative;
+      width: 280px;
+      height: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .cake-plate {
+      width: 230px;
+      height: 8px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    .cake-layer {
+      width: 190px;
+      height: 36px;
+      background: linear-gradient(180deg, #f3d69b 0%, #dfc082 100%);
+      border-bottom: 5px solid #c9a765;
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(-90px) scale(0.9);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .cake-layer.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .cake-icing {
+      position: absolute;
+      bottom: 108px;
+      width: 196px;
+      height: 36px;
+      opacity: 0;
+      transform: translateY(-70px);
+      transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 3;
+    }
+
+    .cake-icing.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .candle-container {
+      position: absolute;
+      bottom: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(-60px);
+      transition: all 0.4s ease;
+      z-index: 4;
+    }
+
+    .candle-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .flame {
+      width: 16px;
+      height: 26px;
+      background: radial-gradient(ellipse at bottom, #fff 10%, #ffeb3b 40%, #ff9800 80%, transparent 100%);
+      border-radius: 50% 50% 35% 35%;
+      box-shadow: 0 0 20px #ff9800, 0 0 40px #ff5722;
+      animation: flicker 0.15s infinite alternate;
+      cursor: pointer;
+      margin-bottom: 2px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .flame.blown {
+      opacity: 0;
+      transform: scale(0) translateY(-15px);
+      pointer-events: none;
+    }
+
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); }
+      100% { transform: scale(1.08) rotate(2deg); }
+    }
+
+    .candle-stick {
+      width: 12px;
+      height: 50px;
+      background: linear-gradient(90deg, #ffdde1, #fff, #f8bbd0);
+      border-radius: 3px;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .candle-stick::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: #f48fb1;
+      box-shadow: 0 10px 0 #f48fb1;
+    }
+
+    .cake-greeting {
+      font-family: 'Caveat', cursive;
+      font-size: 2.35rem;
+      color: var(--gold);
+      margin-top: 22px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.5s ease;
+      text-align: center;
+    }
+
+    .cake-greeting.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .wish-btn {
+      margin-top: 12px;
+      font-size: 1.05rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 8px 20px;
+      border-radius: 25px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .wish-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Screen 3: Balloons */
+    #screen-3 {
+      justify-content: flex-start;
+      padding-top: 40px;
+    }
+
+    .balloon-cluster {
+      position: relative;
+      width: 310px;
+      height: 220px;
+      margin: 10px 0;
+      flex-shrink: 0;
+    }
+
+    .balloon-wrap {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      animation: float 3.2s ease-in-out infinite alternate;
+    }
+
+    .balloon-wrap:nth-child(2) { animation-delay: 0.4s; }
+    .balloon-wrap:nth-child(3) { animation-delay: 0.9s; }
+    .balloon-wrap:nth-child(4) { animation-delay: 1.3s; }
+    .balloon-wrap:nth-child(5) { animation-delay: 1.7s; }
+
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(-2deg); }
+      100% { transform: translateY(-12px) rotate(2deg); }
+    }
+
+    .balloon {
+      width: 76px;
+      height: 92px;
+      border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+      box-shadow: inset -10px -10px 20px rgba(0,0,0,0.25), inset 10px 10px 20px rgba(255,255,255,0.45), 0 8px 18px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-bottom: 7px solid currentColor;
+    }
+
+    .balloon-string {
+      width: 1.5px;
+      height: 55px;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .balloon-wrap.popped {
+      transform: scale(1.6) !important;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .reasons-list {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-bottom: 30px;
+      z-index: 2;
+    }
+
+    .reason-card {
+      background: rgba(45, 20, 38, 0.85);
+      border-radius: 16px;
+      padding: 14px 18px;
+      border: 1.5px solid #ff758f;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(15px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .reason-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #f3a683;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+
+    .reason-text {
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #fff;
+      padding-right: 24px;
+    }
+
+    .sparkle-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+    }
+
+    .thousand-more {
+      font-family: 'Caveat', cursive;
+      font-size: 1.9rem;
+      color: var(--gold);
+      text-align: center;
+      margin: 10px 0 6px;
+      display: none;
+    }
+
+    .btn-main {
+      width: 100%;
+      max-width: 320px;
+      padding: 15px 24px;
+      border-radius: 30px;
+      border: none;
+      background: linear-gradient(90deg, #ff7e5f, #feb47b);
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(255, 126, 95, 0.4);
+      display: none;
+      margin: 8px auto 25px;
+      flex-shrink: 0;
+    }
+
+    /* Screen 4: Envelope & Letter */
+    .envelope-box {
+      width: 100%;
+      max-width: 330px;
+      height: 210px;
+      background: linear-gradient(135deg, #e09f3e, #c57b27);
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 25px 0;
+      transition: transform 0.3s ease;
+    }
+
+    .envelope-box:active {
+      transform: scale(0.97);
+    }
+
+    .envelope-flap-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #f3b552 0%, #d48c2f 100%);
+      clip-path: polygon(0 0, 100% 0, 50% 54%);
+      z-index: 2;
+    }
+
+    .envelope-flap-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(0deg, #b86f1e 0%, #d48c2f 100%);
+      clip-path: polygon(0 100%, 100% 100%, 50% 48%);
+      z-index: 1;
+    }
+
+    .wax-seal {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffd180, #e09f3e 65%, #a86414);
+      border: 2px solid #fff3e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .letter-paper {
+      display: none;
+      width: 100%;
+      max-width: 350px;
+      background: repeating-linear-gradient(#fdf6e4, #fdf6e4 31px, #e8dcc4 32px);
+      border-radius: 16px;
+      padding: 28px 24px;
+      color: #3d2616;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+      font-family: 'Caveat', cursive;
+      animation: unfold 0.5s ease;
+      position: relative;
+    }
+
+    @keyframes unfold {
+      from { opacity: 0; transform: scale(0.85) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .letter-header {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #8c5319;
+      border-bottom: 1.5px solid #e0cba8;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+    }
+
+    .letter-body {
+      font-size: 1.55rem;
+      line-height: 32px;
+      color: #3b2818;
+    }
+
+    .letter-sign {
+      text-align: right;
+      margin-top: 18px;
+      font-size: 1.5rem;
+      color: #8c5319;
+      font-weight: 700;
+    }
+
+    /* Screen 5: Final Celebration */
+    .final-heading {
+      font-size: 2.3rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .final-script {
+      font-family: 'Caveat', cursive;
+      font-size: 3.4rem;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .pet-card {
+      position: relative;
+      width: 190px;
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      cursor: pointer;
+      animation: bouncePet 2s infinite ease-in-out;
+    }
+
+    @keyframes bouncePet {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .speech-bubble {
+      background: #fff;
+      color: #2b1123;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 14px;
+      position: relative;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      animation: pulse 1.8s infinite;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 9px solid #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SCREEN 1: BOW & ARROW HEART BREAK -->
+  <div id="screen-1" class="screen active">
+    <div class="sub-italic">a little something, for you</div>
+
+    <div class="heart-target" id="heart-target">
+      <svg class="heart-svg" id="main-heart" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="heartGrad" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#ff9ebb" />
+            <stop offset="45%" stop-color="#ff4d79" />
+            <stop offset="100%" stop-color="#c9184a" />
+          </radialGradient>
+        </defs>
+        <path d="M50 88 C50 88 10 60 10 34 C10 18 23 8 37 8 C45 8 50 14 50 19 C50 14 55 8 63 8 C77 8 90 18 90 34 C90 60 50 88 50 88 Z" fill="url(#heartGrad)" />
+        <ellipse cx="32" cy="26" rx="8" ry="5" transform="rotate(-25 32 26)" fill="rgba(255,255,255,0.6)" />
+      </svg>
+      <div class="heart-burst-text" id="first-wordings">
+        Happy Birthday to you Thangame! 💖
+      </div>
+    </div>
+
+    <div class="bow-area" id="bow-area">
+      <svg width="200" height="140" viewBox="0 0 200 140" style="overflow: visible;">
+        <!-- Bow Wood -->
+        <path d="M 25 40 Q 100 -15 175 40" fill="none" stroke="#6d3b1e" stroke-width="6" stroke-linecap="round" />
+        <!-- Bow String -->
+        <polyline id="bow-string" points="25,40 100,40 175,40" fill="none" stroke="#a67b5b" stroke-width="2.5" />
+        <!-- Arrow Group -->
+        <g id="arrow-group" transform="translate(0, 0)">
+          <line x1="100" y1="-15" x2="100" y2="55" stroke="#5c3a21" stroke-width="3.5" />
+          <!-- Arrow Heart Tip -->
+          <path d="M100 -25 L92 -12 L100 -15 L108 -12 Z" fill="#ff3366" />
+          <!-- Feather -->
+          <path d="M94 50 L100 42 L106 50 L100 58 Z" fill="#ff4d79" />
+        </g>
+      </svg>
+      <div class="pull-hint" id="pull-hint">PULL & RELEASE</div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: CAKE BUILDING & CANDLE -->
+  <div id="screen-2" class="screen dark-screen" onclick="handleCakeScreenTap()">
+    <div class="title-text">First things first 🎂</div>
+    <div class="instruction-sub" id="cake-instruction">Tap anywhere to build the cake (0/4)</div>
+
+    <div class="cake-stage">
+      <!-- Candle -->
+      <div class="candle-container" id="cake-candle">
+        <div class="flame" id="candle-flame" onclick="blowCandle(event)"></div>
+        <div class="candle-stick"></div>
+      </div>
+
+      <!-- Icing Drip -->
+      <svg class="cake-icing" id="cake-icing" viewBox="0 0 200 45">
+        <path d="M5 12 Q5 0 20 0 L180 0 Q195 0 195 12 L195 22 Q185 38 175 20 Q165 8 155 25 Q145 44 135 22 Q120 10 105 26 Q90 42 80 20 Q65 8 55 34 Q45 45 38 22 Q25 10 15 26 Q5 35 5 20 Z" fill="#fff9f5" />
+      </svg>
+
+      <!-- 3 Cake Sponge Layers -->
+      <div class="cake-layer" id="layer-3"></div>
+      <div class="cake-layer" id="layer-2"></div>
+      <div class="cake-layer" id="layer-1"></div>
+      <div class="cake-plate"></div>
+    </div>
+
+    <div class="cake-greeting" id="cake-greeting">Happy Birthday to you Thangame</div>
+    <button class="wish-btn" id="wish-btn" onclick="blowCandle(event)">Make a wish 🕯️ (Tap to blow)</button>
+  </div>
+
+  <!-- SCREEN 3: 5 BALLOONS -->
+  <div id="screen-3" class="screen dark-screen">
+    <div class="title-text">Pop the balloons 🎈</div>
+    <div class="instruction-sub" id="balloon-sub">5 balloons. Each one holds a reason you're loved.<br>Pop them all 🎈</div>
+
+    <div class="balloon-cluster" id="balloon-cluster">
+      <div class="balloon-wrap" style="left: 15px; top: 55px;" onclick="popBalloon(0, this)">
+        <div class="balloon" style="background: #f6d365; color: #f6d365;"></div>
+        <div class="balloon-string"></div>
+      </div>
+      <div class="balloon-wrap" style="left: 72px; top: 30px;" onclick="popBalloon(1, this)">
+        <div class="balloon" style="background: #b8a9f8; color: #b8a9f8;"></div>
+        <div class="balloon-string"></div>
+      </div>
+      <div class="balloon-wrap" style="left: 125px; top: 0px;" onclick="popBalloon(2, this)">
+        <div class="balloon" style="background: #64dfdf; color: #64dfdf;"></div>
+        <div class="balloon-string"></div>
+      </div>
+      <div class="balloon-wrap" style="left: 178px; top: 35px;" onclick="popBalloon(3, this)">
+        <div class="balloon" style="background: #ff9a76; color: #ff9a76;"></div>
+        <div class="balloon-string"></div>
+      </div>
+      <div class="balloon-wrap" style="left: 220px; top: 65px;" onclick="popBalloon(4, this)">
+        <div class="balloon" style="background: #ff758f; color: #ff758f;"></div>
+        <div class="balloon-string"></div>
+      </div>
+    </div>
+
+    <div class="reasons-list" id="reasons-list"></div>
+    <div class="thousand-more" id="thousand-more">...and a thousand more reasons 💛</div>
+    <button class="btn-main" id="to-letter-btn" onclick="goToScreen(4)">Keep going 💛</button>
+  </div>
+
+  <!-- SCREEN 4: LETTER -->
+  <div id="screen-4" class="screen dark-screen">
+    <div id="envelope-view" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+      <div class="title-text">One last thing, Thangame...</div>
+      <div class="instruction-sub">Thanusan wrote you a letter.</div>
+
+      <div class="envelope-box" onclick="openLetter()">
+        <div class="envelope-flap-top"></div>
+        <div class="wax-seal">T</div>
+        <div class="envelope-flap-bottom"></div>
+      </div>
+
+      <div style="font-size: 1.8rem; margin-top: 8px;">👆</div>
+      <div class="instruction-sub" style="margin-top: 6px;">Tap to open your letter</div>
+    </div>
+
+    <div class="letter-paper" id="le
