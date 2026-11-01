@@ -117,6 +117,7 @@
       align-items: center;
       justify-content: center;
       touch-action: none;
+      cursor: pointer;
     }
 
     .pull-hint {
@@ -627,7 +628,8 @@
       </div>
     </div>
 
-    <div class="bow-area" id="bow-area">
+    <!-- ADDED ONCLICK FALLBACK HERE -->
+    <div class="bow-area" id="bow-area" onclick="shootArrow()">
       <svg width="200" height="140" viewBox="0 0 200 140" style="overflow: visible;">
         <!-- Bow Wood -->
         <path d="M 25 40 Q 100 -15 175 40" fill="none" stroke="#6d3b1e" stroke-width="6" stroke-linecap="round" />
@@ -642,7 +644,7 @@
           <path d="M94 50 L100 42 L106 50 L100 58 Z" fill="#ff4d79" />
         </g>
       </svg>
-      <div class="pull-hint" id="pull-hint">PULL & RELEASE</div>
+      <div class="pull-hint" id="pull-hint">PULL (OR TAP) & RELEASE</div>
     </div>
   </div>
 
@@ -723,4 +725,271 @@
       <div class="instruction-sub" style="margin-top: 6px;">Tap to open your letter</div>
     </div>
 
-    <div class="letter-paper" id="le
+    <div class="letter-paper" id="letter-paper">
+      <div class="letter-header">Dear Thangame,</div>
+      <div class="letter-body">
+        Every year I try to find the perfect words and every year I fall short, so here is the honest version. You make my most ordinary days feel worth remembering 🎂 Happy birthday, my favourite person...
+      </div>
+      <div class="letter-sign">
+        With all my love,<br>— Thanusan
+      </div>
+    </div>
+
+    <button class="btn-main" id="to-final-btn" style="margin-top: 22px;" onclick="goToScreen(5)">Continue ✨</button>
+  </div>
+
+  <!-- SCREEN 5: END CELEBRATION -->
+  <div id="screen-5" class="screen dark-screen" onclick="launchCrackers()">
+    <div class="final-heading">HAPPY<br>BIRTHDAY</div>
+    <div class="final-script">Thangame!</div>
+
+    <div class="speech-bubble">Happy Birthday to you! 🐾💐</div>
+
+    <div class="pet-card">
+      <!-- Cute Puppy with Red Cap & Bouquet SVG -->
+      <svg width="175" height="175" viewBox="0 0 200 200">
+        <!-- Ears -->
+        <ellipse cx="55" cy="95" rx="22" ry="38" transform="rotate(20 55 95)" fill="#8d5524" />
+        <ellipse cx="145" cy="95" rx="22" ry="38" transform="rotate(-20 145 95)" fill="#8d5524" />
+        <!-- Body -->
+        <rect x="65" y="125" width="70" height="55" rx="30" fill="#f5e6d3" />
+        <!-- Paws -->
+        <circle cx="80" cy="175" r="12" fill="#fff" />
+        <circle cx="120" cy="175" r="12" fill="#fff" />
+        <!-- Head -->
+        <circle cx="100" cy="95" r="46" fill="#f5e6d3" />
+        <!-- Snout & Patches -->
+        <ellipse cx="82" cy="88" rx="14" ry="18" fill="#c68642" opacity="0.45" />
+        <ellipse cx="100" cy="108" rx="20" ry="15" fill="#fff" />
+        <!-- Eyes -->
+        <circle cx="82" cy="90" r="6" fill="#1a0b16" />
+        <circle cx="80" cy="88" r="2" fill="#fff" />
+        <circle cx="118" cy="90" r="6" fill="#1a0b16" />
+        <circle cx="116" cy="88" r="2" fill="#fff" />
+        <!-- Nose & Tongue -->
+        <ellipse cx="100" cy="103" rx="7" ry="5" fill="#2b1123" />
+        <path d="M96 112 Q100 124 108 114" fill="#ff4d79" />
+        <!-- Red Cap -->
+        <path d="M62 65 Q100 25 138 65 Z" fill="#c9184a" />
+        <path d="M55 63 Q100 54 152 68 Q135 76 62 67 Z" fill="#a4133c" />
+        <text x="95" y="55" fill="#fff" font-size="14" font-weight="bold" font-family="sans-serif">LA</text>
+        <!-- Tulip Bouquet -->
+        <g transform="translate(30, 100) rotate(-18)">
+          <line x1="25" y1="25" x2="35" y2="65" stroke="#52b788" stroke-width="4" />
+          <line x1="35" y1="20" x2="35" y2="65" stroke="#40916c" stroke-width="4" />
+          <line x1="45" y1="25" x2="35" y2="65" stroke="#52b788" stroke-width="4" />
+          <circle cx="25" cy="22" r="9" fill="#ff4d79" />
+          <circle cx="35" cy="16" r="9" fill="#ff758f" />
+          <circle cx="45" cy="22" r="9" fill="#ffb3c1" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="instruction-sub" style="margin-top: 25px;">Tap anywhere for more birthday crackers! 🎉</div>
+  </div>
+
+  <script>
+    // Haptic Vibration Helper
+    function vibrate(pattern = 45) {
+      if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    // Cracker / Confetti Helper
+    function launchCrackers(originY = 0.6) {
+      vibrate([40, 30, 60]);
+      confetti({
+        particleCount: 75,
+        spread: 80,
+        origin: { y: originY },
+        colors: ['#ff4d79', '#ffbe0b', '#64dfdf', '#b8a9f8', '#ff9a76']
+      });
+    }
+
+    function goToScreen(num) {
+      vibrate(50);
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`screen-${num}`);
+      target.classList.add('active');
+
+      if (num === 5) {
+        launchCrackers(0.5);
+        setTimeout(() => launchCrackers(0.35), 700);
+        setTimeout(() => launchCrackers(0.65), 1400);
+      }
+    }
+
+    /* ================= SCREEN 1: BOW DRAG LOGIC ================= */
+    const bowArea = document.getElementById('bow-area');
+    const bowString = document.getElementById('bow-string');
+    const arrowGroup = document.getElementById('arrow-group');
+    const mainHeart = document.getElementById('main-heart');
+    const firstWordings = document.getElementById('first-wordings');
+    const pullHint = document.getElementById('pull-hint');
+
+    let isDragging = false;
+    let startY = 0;
+    let pullDist = 0;
+    let arrowShot = false;
+
+    function startPull(e) {
+      if (arrowShot) return;
+      isDragging = true;
+      startY = e.touches ? e.touches[0].clientY : e.clientY;
+      vibrate(25);
+    }
+
+    function movePull(e) {
+      if (!isDragging || arrowShot) return;
+      const currentY = e.touches ? e.touches[0].clientY : e.clientY;
+      pullDist = Math.max(0, Math.min(85, currentY - startY));
+
+      bowString.setAttribute('points', `25,40 100,${40 + pullDist} 175,40`);
+      arrowGroup.setAttribute('transform', `translate(0, ${pullDist})`);
+
+      if (pullDist > 20 && Math.floor(pullDist) % 15 === 0) {
+        vibrate(12);
+      }
+    }
+
+    function endPull() {
+      if (!isDragging || arrowShot) return;
+      isDragging = false;
+
+      if (pullDist > 35) {
+        shootArrow();
+      } else {
+        bowString.setAttribute('points', '25,40 100,40 175,40');
+        arrowGroup.setAttribute('transform', 'translate(0, 0)');
+      }
+      pullDist = 0;
+    }
+
+    function shootArrow() {
+      if (arrowShot) return; // Prevents double-firing if tapped multiple times
+      arrowShot = true;
+      vibrate([60, 40, 120]);
+      bowString.setAttribute('points', '25,40 100,40 175,40');
+      arrowGroup.style.transition = 'transform 0.22s ease-in';
+      arrowGroup.setAttribute('transform', 'translate(0, -340)');
+      pullHint.style.opacity = '0';
+
+      setTimeout(() => {
+        // Break Heart & Show Message
+        mainHeart.style.transform = 'scale(1.5)';
+        mainHeart.style.opacity = '0';
+        arrowGroup.style.opacity = '0';
+        launchCrackers(0.45);
+        firstWordings.classList.add('show');
+
+        setTimeout(() => {
+          goToScreen(2);
+        }, 2400);
+      }, 220);
+    }
+
+    bowArea.addEventListener('touchstart', startPull, { passive: true });
+    window.addEventListener('touchmove', movePull, { passive: true });
+    window.addEventListener('touchend', endPull);
+    bowArea.addEventListener('mousedown', startPull);
+    window.addEventListener('mousemove', movePull);
+    window.addEventListener('mouseup', endPull);
+
+    /* ================= SCREEN 2: CAKE BUILDING LOGIC ================= */
+    let cakeStep = 0;
+
+    function handleCakeScreenTap() {
+      if (cakeStep >= 4) return;
+      cakeStep++;
+      vibrate(45);
+
+      const instruction = document.getElementById('cake-instruction');
+
+      if (cakeStep === 1) {
+        document.getElementById('layer-1').classList.add('visible');
+        instruction.innerText = 'Tap again for the next layer (1/4)';
+      } else if (cakeStep === 2) {
+        document.getElementById('layer-2').classList.add('visible');
+        instruction.innerText = 'One more sponge layer! (2/4)';
+      } else if (cakeStep === 3) {
+        document.getElementById('layer-3').classList.add('visible');
+        document.getElementById('cake-icing').classList.add('visible');
+        instruction.innerText = 'Tap to place the birthday candle! (3/4)';
+      } else if (cakeStep === 4) {
+        document.getElementById('cake-candle').classList.add('visible');
+        document.getElementById('cake-greeting').classList.add('visible');
+        document.getElementById('wish-btn').classList.add('visible');
+        instruction.innerText = 'Touch the candle flame or button to make a wish ✨';
+        launchCrackers(0.55);
+      }
+    }
+
+    function blowCandle(e) {
+      e.stopPropagation();
+      if (cakeStep < 4) return;
+      vibrate([80, 50, 100]);
+      document.getElementById('candle-flame').classList.add('blown');
+      document.getElementById('wish-btn').innerText = 'Wish Made! ✨';
+      launchCrackers(0.5);
+
+      setTimeout(() => {
+        goToScreen(3);
+      }, 1700);
+    }
+
+    /* ================= SCREEN 3: 5 BALLOONS LOGIC ================= */
+    const reasons = [
+      "Your laugh is my favourite sound",
+      "You make ordinary days feel special",
+      "You believed in me when I didn't • The world is kinder with you in it",
+      "You remember the little things I forget",
+      "My worst days get shorter when you call"
+    ];
+
+    const cardColors = ['#ff758f', '#64dfdf', '#ff9a76', '#f6d365', '#b8a9f8'];
+    let poppedCount = 0;
+
+    function popBalloon(index, el) {
+      if (el.classList.contains('popped')) return;
+      el.classList.add('popped');
+      poppedCount++;
+      vibrate([50, 30]);
+
+      confetti({
+        particleCount: 28,
+        spread: 55,
+        origin: { y: 0.35 }
+      });
+
+      const list = document.getElementById('reasons-list');
+      const card = document.createElement('div');
+      card.className = 'reason-card';
+      card.style.borderColor = cardColors[poppedCount - 1];
+      card.innerHTML = `
+        <div class="reason-badge">REASON NO.${poppedCount} 💖</div>
+        <div class="reason-text">${reasons[poppedCount - 1]}</div>
+        <div class="sparkle-icon">✨</div>
+      `;
+      list.appendChild(card);
+
+      if (poppedCount === 5) {
+        document.getElementById('balloon-cluster').style.display = 'none';
+        document.getElementById('balloon-sub').innerText = 'All 5 reasons unlocked! 💖';
+        document.getElementById('thousand-more').style.display = 'block';
+        document.getElementById('to-letter-btn').style.display = 'block';
+        launchCrackers(0.6);
+      }
+    }
+
+    /* ================= SCREEN 4: LETTER LOGIC ================= */
+    function openLetter() {
+      vibrate([60, 40, 60]);
+      document.getElementById('envelope-view').style.display = 'none';
+      document.getElementById('letter-paper').style.display = 'block';
+      document.getElementById('to-final-btn').style.display = 'block';
+      launchCrackers(0.4);
+    }
+  </script>
+</body>
+</html>
