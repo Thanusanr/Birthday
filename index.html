@@ -607,6 +607,9 @@
 </head>
 <body>
 
+  <!-- BACKGROUND MUSIC PLAYER -->
+  <audio id="bg-music" src="bgm.mp3" loop></audio>
+
   <!-- SCREEN 1: BOW & ARROW HEART BREAK -->
   <div id="screen-1" class="screen active">
     <div class="sub-italic">a little something, for you</div>
@@ -867,9 +870,15 @@
     }
 
     function shootArrow() {
-      if (arrowShot) return; // Prevents double-firing if tapped multiple times
+      if (arrowShot) return;
       arrowShot = true;
       vibrate([60, 40, 120]);
+      
+      // PLAY THE BACKGROUND MUSIC HERE
+      const bgMusic = document.getElementById('bg-music');
+      bgMusic.volume = 0.5;
+      bgMusic.play().catch(e => console.log("Audio play blocked by browser"));
+
       bowString.setAttribute('points', '25,40 100,40 175,40');
       arrowGroup.style.transition = 'transform 0.22s ease-in';
       arrowGroup.setAttribute('transform', 'translate(0, -340)');
